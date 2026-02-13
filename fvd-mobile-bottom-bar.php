@@ -184,9 +184,18 @@ final class FVD_Mobile_Bottom_Bar {
 
     $zip = '';
     if (!empty($body['assets']) && is_array($body['assets'])) {
+      // Prefer exact release asset name; fallback to first .zip if not found.
       foreach ($body['assets'] as $asset) {
         if (!empty($asset['name']) && !empty($asset['browser_download_url'])) {
           if ($asset['name'] === self::RELEASE_ASSET_ZIP) {
+            $zip = $asset['browser_download_url'];
+            break;
+          }
+        }
+      }
+      if (!$zip) {
+        foreach ($body['assets'] as $asset) {
+          if (!empty($asset['browser_download_url']) && $this->ends_with((string)$asset['browser_download_url'], '.zip')) {
             $zip = $asset['browser_download_url'];
             break;
           }
@@ -546,6 +555,11 @@ final class FVD_Mobile_Bottom_Bar {
     }
 
     return '';
+  }
+
+  private function ends_with(string $haystack, string $needle): bool {
+    if ($needle === '') return true;
+    return substr($haystack, -strlen($needle)) === $needle;
   }
 }
 
